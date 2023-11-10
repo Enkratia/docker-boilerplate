@@ -6,4 +6,4 @@ docker-compose up --build --force-recreate
 
 docker-compose -f docker-compose.production.yml up --build --force-recreate
 
-### Перепроверить количество/наличие дефисов в каждом случае
+**Перепроверить количество/наличие дефисов в каждом случае**
