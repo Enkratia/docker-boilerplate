@@ -1,0 +1,52 @@
+# Build
+FROM node:20-alpine AS deps
+
+ENV NODE_ENV=production
+
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+#TEST 
+COPY docker-compose.yml docker-compose.production.yml Dockerfile.production ./
+
+COPY package.json package-lock.json tsconfig.json ./
+RUN npm ci --cache .npm
+
+# Rebuild
+FROM node:20-alpine AS builder
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+#TEST 
+COPY docker-compose.yml docker-compose.production.yml Dockerfile.production ./
+
+COPY package.json package-lock.json tsconfig.json ./
+COPY next.config.js ./next.config.js
+COPY --from=deps /app/node_modules ./node_modules
+
+COPY src ./src
+COPY public ./public
+
+RUN npm run build
+
+# Production image (copy all the files and run next)
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public .public
+
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+
+USER nextjs
+
+CMD ["node", "server.js"]
