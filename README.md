@@ -1,9 +1,9 @@
 # Dev mode
 
-docker-compose up --build --force-recreate
+docker-compose -up --build --force-recreate
 
 # Production
 
 docker-compose -f docker-compose.production.yml up --build --force-recreate
 
-**!Перепроверить количество/наличие дефисов в каждом случае.**
+**!Перепроверить количество/наличие дефисов для up && build**
